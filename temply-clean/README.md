@@ -22,6 +22,10 @@ Permettre aux développeurs et designers de :
 - 📋 **Copie rapide** du code HTML/CSS
 - 💡 Interface responsive, claire et intuitive
 
+<img src="temply1.png" alt="Aperçu de Temply" width="800"/>
+<img src="temply2.png" alt="Aperçu de Temply" width="800"/>
+<img src="temply3.png" alt="Aperçu de Temply" width="800"/>
+
 ---
 
 ## 🚀 Technologies utilisées
@@ -48,8 +52,4 @@ npm install
 
 # Lancer le serveur de développement
 npm run dev
-
-<img src="temply1.png" alt="Aperçu de Temply" width="800"/>
-<img src="temply2.png" alt="Aperçu de Temply" width="800"/>
-<img src="temply3.png" alt="Aperçu de Temply" width="800"/>
 
