@@ -8,7 +8,8 @@ import Detail from '../views/Detail.vue';
 const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/templates', name: 'Templates', component: Templates },
-    { path: '/mestemplates', name: 'MesTemplates', component: MesTemplates },
+  { path: '/details', name: 'Details', component: Detail },
+  { path: '/mestemplates', name: 'MesTemplates', component: MesTemplates },
   { path: '/categories', name: 'Categories', component: Categories },
   { path: '/detail/:id', name: 'detail', component: Detail },
   { path: '/profile', name: 'profile', component: () => import('../views/Profile.vue'), }

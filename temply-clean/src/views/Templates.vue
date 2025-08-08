@@ -142,7 +142,7 @@
 
           <button
             v-if="selectedTemplate.type === 'Free'"
-            @click="useTemplate(selectedTemplate)"
+            
             class="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded transition font-semibold"
           >
             Utiliser
