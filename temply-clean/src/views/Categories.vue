@@ -1,20 +1,35 @@
 <template>
   <div class="min-h-screen bg-background text-text relative">
-    
     <!-- Bouton Retour -->
-    <button
-      @click="goBack"
-      class="absolute top-6 left-6 bg-accent text-white px-4 py-2 rounded-lg shadow hover:bg-accent/80 transition"
+    <header
+      class="fixed top-0 left-0 w-full bg-background shadow z-50 flex justify-between items-center px-6 py-4"
     >
-      <img :src="retour" alt="fleche" class="h-5 w-auto" />
-    </button>
+        <img :src="logo" alt="Logo Temply" class="h-10 w-auto" />
+
+      <nav class="flex gap-6">
+        <button
+          @click="router.push('/templates')"
+          class="hover:text-accent transition"
+        >
+          Templates
+        </button>
+      
+        <button
+          @click="router.push('/')"
+          class="hover:text-accent transition"
+        >
+          Accueil
+        </button>
+      </nav>
+    </header>
 
     <div class="pt-24 px-6">
       <h2 class="text-4xl font-bold text-center text-primary mb-8">
         Catégories
       </h2>
 
-      <div class="max-w-2xl mx-auto mb-6 flex items-center gap-4">
+      <!-- Barre de recherche -->
+      <div class="max-w-2xl mx-auto flex items-center gap-4 mb-6">
         <input
           v-model="searchQuery"
           type="text"
@@ -29,89 +44,113 @@
         </button>
       </div>
 
-      <div class="flex gap-3 flex-wrap justify-center mb-8">
-        <button
-          v-for="cat in uniqueCategories"
-          :key="cat"
-          @click="filterBy(cat)"
-          class="px-4 py-1 text-sm rounded-full"
-          :class="
-            selectedCategory === cat
-              ? 'bg-accent text-white'
-              : 'bg-border text-text hover:bg-accent hover:text-white transition'
-          "
-        >
-          {{ cat }}
-        </button>
-        <button
-          @click="clearFilter"
-          class="px-4 py-1 text-sm bg-border text-text rounded-full hover:bg-accent hover:text-white transition"
-        >
-          Tous
-        </button>
-      </div>
+     
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div
-          v-for="categorie in filteredCategories"
-          :key="categorie.id"
-          class="bg-border rounded-xl shadow-md p-4 relative transform transition-transform duration-300 hover:scale-105"
-        >
-          <!-- Favori -->
-          <button
-            @click="toggleFavori(categorie)"
-            class="absolute top-4 right-4 text-accent hover:text-primary text-xl"
-          >
-            <span v-if="isFavori(categorie)"><img :src="favoris1" alt="Logo favoris" class="h-5 w-auto" />
-</span>
-            <span v-else
-              ><img :src="favoris2" alt="Logo favoris" class="h-5 w-auto" />
-            </span>
-          </button>
+     <!-- Grille compacte des catégories -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <div
+    v-for="categorie in paginatedCategories"
+    :key="categorie.id"
+    class="bg-border rounded-xl shadow-md hover:shadow-lg transform transition-all duration-300 hover:scale-105 relative overflow-hidden p-3"
+  >
+    <!-- Badge Nouveau -->
+    <span
+      v-if="categorie.isNew"
+      class="absolute top-2 left-2 bg-yellow-400 text-black text-xs font-semibold px-2 py-1 rounded-full shadow"
+    >
+      Nouveau
+    </span>
 
-          <img
-            :src="categorie.image"
-            alt="Template"
-            class="rounded-md mb-3 h-32 w-full object-cover"
-          />
-          <h3 class="text-lg font-semibold mb-1">{{ categorie.name }}</h3>
-          <p class="text-xs text-text/70">
-            Catégorie : {{ categorie.category }}
-          </p>
-          <button
-            @click="openModal(categorie)"
-            class="mt-4 w-full py-1.5 text-accent text-sm font-semibold flex items-center justify-center gap-1 hover:text-primary transition"
-          >
-            Consulter
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
+    <!-- Favori -->
+    <button
+      @click="toggleFavori(categorie)"
+      class="absolute top-2 right-2 z-10 text-accent hover:text-primary transition"
+    >
+      <span v-if="isFavori(categorie)">
+        <img :src="favoris1" alt="Favori" class="h-4 w-auto" />
+      </span>
+      <span v-else>
+        <img :src="favoris2" alt="Favori" class="h-4 w-auto" />
+      </span>
+    </button>
+
+    <!-- Image -->
+    <div class="overflow-hidden rounded-t-lg">
+      <img
+        :src="categorie.image"
+        alt="Template"
+        class="w-full h-28 object-cover transition-transform duration-500 hover:scale-105"
+      />
     </div>
 
-    <!-- Pagination -->
-    <div class="flex justify-center mt-12 space-x-2">
+    <!-- Contenu -->
+    <div class="flex flex-col gap-1 mt-2">
+      <h3 class="text-sm font-semibold text-primary">{{ categorie.name }}</h3>
+      <p class="text-xs text-text/70">Catégorie : {{ categorie.slug }}</p>
+
+      <!-- Bouton Consulter -->
       <button
-        v-for="page in 10"
-        :key="page"
-        class="w-10 h-10 flex items-center justify-center rounded-full bg-border hover:bg-accent text-white transition"
+        @click="openModal(categorie)"
+        class="mt-1 w-full py-1 text-xs font-semibold flex items-center justify-center gap-1 text-white bg-accent rounded hover:bg-primary transition"
       >
-        {{ page }}
+        Consulter
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-3 w-3"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
       </button>
     </div>
+  </div>
+</div>
+
+    </div>
+
+   <!-- Pagination améliorée -->
+<div class="flex justify-center mt-8 items-center gap-2">
+  <!-- Bouton Précédent -->
+  <button
+    @click="currentPage > 1 && currentPage--"
+    :disabled="currentPage === 1"
+    class="px-3 py-1 rounded-full bg-border text-white hover:bg-accent disabled:opacity-50 transition"
+  >
+    &laquo;
+  </button>
+
+  <!-- Numéros de page -->
+  <button
+    v-for="page in totalPages"
+    :key="page"
+    @click="currentPage = page"
+    :class="{
+      'bg-accent text-white': currentPage === page,
+      'bg-border text-white hover:bg-accent': currentPage !== page
+    }"
+    class="w-10 h-10 flex items-center justify-center rounded-full transition"
+  >
+    {{ page }}
+  </button>
+
+ <!-- Bouton Suivant -->
+<button
+  @click="currentPage < totalPages ? currentPage++ : null"
+  :disabled="currentPage === totalPages"
+  class="px-3 py-1 rounded-full bg-border text-white hover:bg-accent disabled:opacity-50 transition"
+>
+  &raquo;
+</button>
+
+</div>
+
 
     <!-- Flèches haut/bas -->
     <button
@@ -148,17 +187,15 @@
             class="rounded mb-4 w-full object-cover max-h-48"
           />
           <h3 class="text-2xl font-bold mb-2">{{ selectedTemplate.name }}</h3>
-          <p class="mb-2 text-text/70">
-            Catégorie : {{ selectedTemplate.category }}
-          </p>
+         
           <p class="mb-4 text-text/80">
-            Description détaillée du template (à personnaliser).
+            {{ selectedTemplate.slug }}.
           </p>
-          <button
+          <!--<button
             class="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded transition font-semibold"
           >
             Voir
-          </button>
+          </button>-->
         </div>
       </div>
     </transition>
@@ -166,41 +203,84 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import axios from "axios";
+
 import fleche from "../assets/fleche.png";
 import fleche1 from "../assets/fleche1.png";
 import retour from "../assets/retour.png";
-import image1 from "../assets/cap1.png";
 import favoris2 from "../assets/favoris2.png";
 import favoris1 from "../assets/favoris1.png";
-
 import { useRouter } from "vue-router";
 const router = useRouter();
+import logo from "../assets/logo.png";
 
-const categories = [
-  { id: 1, name: "Template Portfolio", category: "Portfolio", image: image1 },
-  { id: 2, name: "Template Admin", category: "Dashboard", image: image1 },
-  { id: 3, name: "Template Blog", category: "Blog", image: image1 },
-];
-
+const categories = ref([]); // <-- tableau dynamique
 const searchQuery = ref("");
 const selectedCategory = ref(null);
 const selectedTemplate = ref(null);
 const favoris = ref([]);
+const categoriesPerPage = 6;
+const currentPage = ref(1);
+const paginatedCategories = computed(() => {
+  const start = (currentPage.value - 1) * categoriesPerPage;
+  const end = start + categoriesPerPage;
+  return filteredCategories.value.slice(start, end);
+});
+const totalPages = computed(() => {
+  return Math.ceil(filteredCategories.value.length / categoriesPerPage);
+});
+
+
+// Computed pour filtrer dynamiquement
+const filteredCategories = computed(() => {
+  return categories.value.filter((c) => {
+    const matchesCategory =
+      !selectedCategory.value || c.category === selectedCategory.value;
+    const matchesSearch = c.name
+      .toLowerCase()
+      .includes(searchQuery.value.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+});
+
+// Fetch categories depuis le backend
+const fetchCategories = async () => {
+  try {
+    const response = await axios.get("http://localhost:8000/api/categories");
+    categories.value = response.data.map((cat) => ({
+      ...cat,
+      image: `http://localhost:8000/storage/${cat.img_url}`,
+      // transforme img_url en URL complète
+    }));
+    console.log(categories.value); // pour vérifier si les données sont correctes
+  } catch (error) {
+    console.error("Erreur lors de la récupération des catégories :", error);
+  }
+};
+
+// Appeler la fonction au montage du composant
+onMounted(() => {
+  fetchCategories();
+});
 
 const goBack = () => window.history.back();
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 const scrollToBottom = () =>
   window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+// Recherche déclenchée par le bouton
+function searchTemplates() {
+  // Les catégories affichées sont automatiquement filtrées par `filteredCategories`
+  // donc il suffit de recalculer le computed
+  // Ici on peut simplement forcer le recalcul en changeant currentPage si nécessaire
+  currentPage.value = 1;
+}
 
 function openModal(template) {
   selectedTemplate.value = template;
 }
 function closeModal() {
   selectedTemplate.value = null;
-}
-function searchTemplates() {
-  alert(`Recherche : ${searchQuery.value}`);
 }
 
 function filterBy(cat) {
@@ -209,18 +289,8 @@ function filterBy(cat) {
 function clearFilter() {
   selectedCategory.value = null;
 }
-
-const uniqueCategories = [...new Set(categories.map((c) => c.category))];
-
-const filteredCategories = computed(() => {
-  return categories.filter((c) => {
-    const matchesCategory =
-      !selectedCategory.value || c.category === selectedCategory.value;
-    const matchesSearch = c.name
-      .toLowerCase()
-      .includes(searchQuery.value.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+const uniqueCategories = computed(() => {
+  return [...new Set(categories.value.map((c) => c.category))];
 });
 
 function toggleFavori(categorie) {
@@ -235,6 +305,7 @@ function isFavori(categorie) {
   return favoris.value.some((f) => f.id === categorie.id);
 }
 </script>
+
 
 <style>
 .modal-fade-enter-active,
